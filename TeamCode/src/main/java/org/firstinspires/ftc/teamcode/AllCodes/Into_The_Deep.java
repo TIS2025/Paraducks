@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.AllCodes;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
@@ -11,6 +13,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.InstantCommand.ElevatorCommand;
@@ -24,11 +27,18 @@ import org.firstinspires.ftc.teamcode.hardware.Globals;
 import org.firstinspires.ftc.teamcode.hardware.RobotHardware;
 import org.firstinspires.ftc.teamcode.subsystem.ElevatorSubsytem;
 import org.firstinspires.ftc.teamcode.subsystem.OuttakeSubsystem;
+import org.firstinspires.ftc.teamcode.vision.GripperOrientPipeline;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @TeleOp()
 @Config
-public class Into_The_Deep extends LinearOpMode {
+public class  Into_The_Deep extends LinearOpMode {
 
+    GripperOrientPipeline pipeline = new GripperOrientPipeline();
+    public int CAMERA_HEIGHT = 720;
+    public int CAMERA_WIDTH = 1280;
 
     // TODO ================================================== SUBSYSTEMS ===========================================================================
     private OuttakeSubsystem outtake;
@@ -54,6 +64,8 @@ public class Into_The_Deep extends LinearOpMode {
         drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
         outtake = new OuttakeSubsystem(robot);
         elevator = new ElevatorSubsytem(robot);
+
+        initCamera();
 
         while (opModeInInit()) {
             // Do Nothing
@@ -183,8 +195,7 @@ public class Into_The_Deep extends LinearOpMode {
             telemetry.addData("Green Value", robot.SensorColor1.green());
 
             telemetry.addData("Distance Value", robot.SensorColor1.getDistance(DistanceUnit.MM));
-
-
+            telemetry.addData("Gripper Orientation",pipeline.getAngle());
 
             telemetry.update();
             drive.updatePoseEstimate();
@@ -211,6 +222,20 @@ public class Into_The_Deep extends LinearOpMode {
         drive.rightBack.setPower(backRightPower);
         drive.rightFront.setPower(frontRightPower);
 
+    }
+
+    private void initCamera(){
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        OpenCvCamera controlHubCam = OpenCvCameraFactory.getInstance().createWebcam(
+                hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        controlHubCam.setPipeline(pipeline);
+        controlHubCam.openCameraDevice();
+        controlHubCam.startStreaming(CAMERA_WIDTH, CAMERA_HEIGHT, OpenCvCameraRotation.UPSIDE_DOWN);
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        telemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
+        FtcDashboard.getInstance().startCameraStream(controlHubCam, 30);
     }
 }
 

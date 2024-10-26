@@ -205,6 +205,10 @@ public class OuttakeSubsystem {
         }
     }
 
+    public void CustomRackState(double pos){
+        setRackPos(pos);
+    }
+
     public void ArmServo(double pos){
         robot.Arm.setPosition(pos);
     }

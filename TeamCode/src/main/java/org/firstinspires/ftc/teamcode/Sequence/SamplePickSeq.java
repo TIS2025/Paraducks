@@ -33,7 +33,6 @@ public class SamplePickSeq {
                             new InstantAction(()-> new RackExtendCommand(outtake, OuttakeSubsystem.RackExtendState.SAMPLE_PICK)),
                             new InstantAction(()-> new ShoulderCommand(outtake, OuttakeSubsystem.ShoulderState.SAMPLE_PICK)),
                             new InstantAction(() -> new GripperCommand(outtake, OuttakeSubsystem.GripperState.GRIP_OPEN))
-
                         )
             );
         }
